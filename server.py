@@ -11,13 +11,13 @@ def server_function():
 
     while True:
         try:
-            for _ in stream_ids:
+            for stream_id in stream_ids:
                 quic_recv(sock)
         except Exception as e:
             print(f"Error receiving packet: {e}")
             break
 
-    quic_close('localhost', 10000)
+    quic_close(sock, ('localhost', 10000))
 
 
 if __name__ == '__main__':
