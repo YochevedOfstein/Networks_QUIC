@@ -2,8 +2,10 @@ import socket
 from quic import quic_send, quic_close, print_statistics
 
 def client_function():
+    HOST = '127.0.0.1'
+    PORT = 12345
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    destination = ('localhost', 10000)
+    destination = (HOST, PORT)
     stream_ids = list(range(1, 11))
     data = b"Hello this is client data" * 100
 

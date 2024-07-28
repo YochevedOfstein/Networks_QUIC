@@ -3,7 +3,10 @@ from quic import quic_recv, quic_close, print_statistics
 
 def server_function():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind(('localhost', 10000))
+    HOST = '127.0.0.1'
+    PORT = 12345
+    addr = (HOST, PORT)
+    sock.bind(addr)
 
     print("Server listening")
     stream_ids = list(range(1, 11))
@@ -19,7 +22,7 @@ def server_function():
     except Exception as e:
         print(f"Error receiving packet: {e}")
 
-    quic_close(sock, ('localhost', 10000))
+    quic_close(sock, (HOST, PORT))
     print_statistics()
 
 if __name__ == '__main__':

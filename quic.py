@@ -52,6 +52,7 @@ def quic_send(data, destination, sock, stream_id):
 def quic_recv(sock):
     packet, _ = sock.recvfrom(2048)
     if packet == b"close":
+        sock.close()
         print("Received close packet")
         return "close", None, None
 
