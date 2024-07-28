@@ -68,7 +68,7 @@ def quic_recv(sock):
     stream_statistics[stream_id]['bytes'] += len(data)
     stream_statistics[stream_id]['packets'] += 1
     stream_statistics[stream_id]['end_time'] = time.time()
-    print(f"Received packet from stream {stream_id}, frame offset {frame_offset}, data: {data.decode()}")
+    print(f"Received packet from stream {stream_id}, frame offset {frame_offset}")
     return stream_id, frame_offset, data
 
 def quic_close(sock, destination):
