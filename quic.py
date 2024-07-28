@@ -6,7 +6,6 @@ import time
 stream_packet_sizes = {}
 stream_statistics = {}
 
-
 def set_stream_packet_size(stream_id):
     if stream_id not in stream_packet_sizes:
         packet_size = random.randint(1000, 2000)
@@ -14,15 +13,12 @@ def set_stream_packet_size(stream_id):
         stream_statistics[stream_id] = {'bytes': 0, 'packets': 0, 'start_time': None, 'end_time': None}
     return stream_packet_sizes[stream_id]
 
-
 def create_quic_packet(stream_id, sequence_number, data):
     packet_size = set_stream_packet_size(stream_id)
     data = data[:packet_size]
-    data = data.ljust(packet_size, b'\x00')
     packet_format = f'I I H {packet_size}s'
     packet = struct.pack(packet_format, stream_id, sequence_number, len(data), data)
     return packet
-
 
 def parse_quic_packet(packet):
     header_format = 'I I H'
@@ -31,16 +27,16 @@ def parse_quic_packet(packet):
         stream_id, frame_offset, payload_length = struct.unpack(header_format, packet[:header_size])
         data_format = f'{payload_length}s'
         data = struct.unpack(data_format, packet[header_size:header_size + payload_length])[0]
-        data = data.rstrip(b'\x00')
         return stream_id, frame_offset, data
     except struct.error as e:
         print(f"Error parsing packet: {e}")
         print(f"Packet length: {len(packet)}, Expected header size: {header_size}")
         return None, None, None
 
-
 def quic_send(data, destination, sock, stream_id):
     frame_offset = 0
+    if stream_id not in stream_statistics:
+        stream_statistics[stream_id] = {'bytes': 0, 'packets': 0, 'start_time': None, 'end_time': None}
     while data:
         packet = create_quic_packet(stream_id, frame_offset, data)
         if stream_statistics[stream_id]['start_time'] is None:
@@ -52,8 +48,6 @@ def quic_send(data, destination, sock, stream_id):
         frame_offset += len(data[:stream_packet_sizes[stream_id]])
         data = data[stream_packet_sizes[stream_id]:]
         print(f"Sent packet to {destination} with size {len(packet)} bytes for stream {stream_id}, frame offset {frame_offset}")
-
-
 
 def quic_recv(sock):
     packet, _ = sock.recvfrom(2048)
@@ -67,8 +61,7 @@ def quic_recv(sock):
         return
 
     if stream_id not in stream_statistics:
-        print(f"Unknown stream ID {stream_id}. Discarding packet.")
-        return
+        stream_statistics[stream_id] = {'bytes': 0, 'packets': 0, 'start_time': None, 'end_time': None}
 
     if stream_statistics[stream_id]['start_time'] is None:
         stream_statistics[stream_id]['start_time'] = time.time()
@@ -78,7 +71,6 @@ def quic_recv(sock):
     print(f"Received packet from stream {stream_id}, frame offset {frame_offset}, data: {data.decode()}")
     return stream_id, frame_offset, data
 
-
 def quic_close(sock, destination):
     try:
         sock.sendto(b"close", destination)
@@ -86,7 +78,6 @@ def quic_close(sock, destination):
         print("QUIC connection closed")
     except socket.error as e:
         print(f"Socket error: {e}")
-
 
 def print_statistics():
     for stream_id, stats in stream_statistics.items():
