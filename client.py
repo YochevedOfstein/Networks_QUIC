@@ -1,5 +1,5 @@
 import socket
-from quic import quic_send, quic_close, print_statistics
+from quic import quic_send, quic_close
 
 def client_function():
     HOST = '127.0.0.1'
@@ -13,7 +13,6 @@ def client_function():
         quic_send(data, destination, sock, stream_id)
 
     quic_close(sock, destination)
-    print_statistics()
 
 if __name__ == '__main__':
     client_function()
