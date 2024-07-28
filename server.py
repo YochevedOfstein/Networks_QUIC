@@ -22,7 +22,6 @@ def server_function():
     except Exception as e:
         print(f"Error receiving packet: {e}")
 
-    quic_close(sock, (HOST, PORT))
     print_statistics()
 
 if __name__ == '__main__':
