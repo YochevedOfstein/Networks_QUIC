@@ -2,7 +2,6 @@ import struct
 import socket
 import random
 import time
-import matplotlib.pyplot as plt
 
 
 # Global dictionaries for packet sizes and statistics
@@ -61,7 +60,7 @@ def quic_recv(sock):
     packet, _ = sock.recvfrom(2048)
     if packet == b"close":
         sock.close()
-        print("Received close packet")
+        # print("Received close packet")
         return "close", None, None
 
     stream_id, frame_offset, data = parse_quic_packet(packet)
@@ -77,7 +76,7 @@ def quic_recv(sock):
     stream_statistics[stream_id]['bytes'] += len(data)
     stream_statistics[stream_id]['packets'] += 1
     stream_statistics[stream_id]['end_time'] = time.time()
-    print(f"Received packet from stream {stream_id}, frame offset {frame_offset}")
+    # print(f"Received packet from stream {stream_id}, frame offset {frame_offset}")
     return stream_id, frame_offset, data
 
 
@@ -90,7 +89,68 @@ def quic_close(sock, destination):
         print(f"Socket error: {e}")
 
 
+# def print_statistics():
+#     for stream_id, stats in stream_statistics.items():
+#         total_bytes = stats['bytes']
+#         total_packets = stats['packets']
+#         start_time = stats['start_time']
+#         end_time = stats['end_time']
+#         duration = end_time - start_time if end_time and start_time else 0
+#         data_rate = total_bytes / duration if duration > 0 else 0
+#         packet_rate = total_packets / duration if duration > 0 else 0
+#         print(f"Stream {stream_id}:")
+#         print(f"\tTotal bytes: {total_bytes}")
+#         print(f"\tTotal packets: {total_packets}")
+#         print(f"\tData rate: {data_rate:.2f} bytes/sec")
+#         print(f"\tPacket rate: {packet_rate:.2f} packets/sec")
+#
+#
+#     total_bytes = sum(stats['bytes'] for stats in stream_statistics.values())
+#     total_packets = sum(stats['packets'] for stats in stream_statistics.values())
+#     total_duration = max((stats['end_time'] - stats['start_time']) for stats in stream_statistics.values() if
+#                          stats['end_time'] and stats['start_time'])
+#     total_data_rate = total_bytes / total_duration if total_duration > 0 else 0
+#     total_packet_rate = total_packets / total_duration if total_duration > 0 else 0
+#
+#     data_rates.append(total_data_rate)
+#     packet_rates.append(total_packet_rate)
+#     num_flows_list.append(len(stream_statistics))
+#
+#     print("Overall statistics:")
+#     print(f"\tTotal bytes: {total_bytes}")
+#     print(f"\tTotal packets: {total_packets}")
+#     print(f"\tData rate: {total_data_rate:.2f} bytes/sec")
+#     print(f"\tPacket rate: {total_packet_rate:.2f} packets/sec")
+
+
 def print_statistics():
+    with open('statistics.txt', 'w') as file:
+        for stream_id, stats in stream_statistics.items():
+            total_bytes = stats['bytes']
+            total_packets = stats['packets']
+            start_time = stats['start_time']
+            end_time = stats['end_time']
+            duration = end_time - start_time if end_time and start_time else 0
+            data_rate = total_bytes / duration if duration > 0 else 0
+            packet_rate = total_packets / duration if duration > 0 else 0
+            file.write(f"Stream {stream_id}:\n")
+            file.write(f"\tTotal bytes: {total_bytes}\n")
+            file.write(f"\tTotal packets: {total_packets}\n")
+            file.write(f"\tData rate: {data_rate:.2f} bytes/sec\n")
+            file.write(f"\tPacket rate: {packet_rate:.2f} packets/sec\n")
+
+        total_bytes = sum(stats['bytes'] for stats in stream_statistics.values())
+        total_packets = sum(stats['packets'] for stats in stream_statistics.values())
+        total_duration = max((stats['end_time'] - stats['start_time']) for stats in stream_statistics.values() if
+                             stats['end_time'] and stats['start_time'])
+        total_data_rate = total_bytes / total_duration if total_duration > 0 else 0
+        total_packet_rate = total_packets / total_duration if total_duration > 0 else 0
+
+        file.write("Overall statistics:\n")
+        file.write(f"\tData rate: {total_data_rate:.2f} bytes/sec\n")
+        file.write(f"\tPacket rate: {total_packet_rate:.2f} packets/sec\n")
+
+    print(f"\n")
     for stream_id, stats in stream_statistics.items():
         total_bytes = stats['bytes']
         total_packets = stats['packets']
@@ -104,7 +164,6 @@ def print_statistics():
         print(f"\tTotal packets: {total_packets}")
         print(f"\tData rate: {data_rate:.2f} bytes/sec")
         print(f"\tPacket rate: {packet_rate:.2f} packets/sec")
-
 
     total_bytes = sum(stats['bytes'] for stats in stream_statistics.values())
     total_packets = sum(stats['packets'] for stats in stream_statistics.values())
@@ -122,4 +181,3 @@ def print_statistics():
     print(f"\tTotal packets: {total_packets}")
     print(f"\tData rate: {total_data_rate:.2f} bytes/sec")
     print(f"\tPacket rate: {total_packet_rate:.2f} packets/sec")
-
