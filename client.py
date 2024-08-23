@@ -4,8 +4,9 @@ import time
 
 
 def client_function():
+    Number_Of_Streams = 10
     HOST = '127.0.0.1'
-    PORT = 12345
+    PORT = 5060
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     destination = (HOST, PORT)
 
@@ -14,11 +15,11 @@ def client_function():
         'file6.txt', 'file7.txt', 'file8.txt', 'file9.txt', 'file10.txt'
     ]
 
-    # Iterate over the files and send each one in a different stream
-    for i, file_path in enumerate(file_paths, start=1):
+    for i in range(Number_Of_Streams):
+        file_path = file_paths[i%10]
         with open(file_path, 'rb') as file:
             data = file.read()
-            quic_send(sock, destination, data, i)
+            quic_send(sock, destination, data, i+1)
 
     quic_close(sock, destination)
 

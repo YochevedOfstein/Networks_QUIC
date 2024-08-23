@@ -2,10 +2,15 @@ import struct
 import socket
 import random
 import time
+import matplotlib.pyplot as plt
+
 
 # Global dictionaries for packet sizes and statistics
 stream_packet_sizes = {}
 stream_statistics = {}
+data_rates = []
+packet_rates = []
+num_flows_list = []
 
 
 def set_stream_packet_size(stream_id):
@@ -38,7 +43,6 @@ def parse_quic_packet(packet):
 
 
 def quic_send(sock, destination, data, stream_id):
-    print(f"Type of data: {type(data)}")  # Debug statement
     frame_offset = 0
     packet_size = set_stream_packet_size(stream_id)
     while frame_offset < len(data):
@@ -48,8 +52,10 @@ def quic_send(sock, destination, data, stream_id):
         stream_statistics[stream_id]['bytes'] += len(packet_data)
         stream_statistics[stream_id]['packets'] += 1
         stream_statistics[stream_id]['end_time'] = time.time()
-        print(f"Sent packet to {destination} with size {len(packet)} bytes for stream {stream_id}, frame offset {frame_offset}")
+        print(
+            f"Sent packet to {destination} with size {len(packet)} bytes for stream {stream_id}, frame offset {frame_offset}")
         frame_offset += packet_size
+
 
 def quic_recv(sock):
     packet, _ = sock.recvfrom(2048)
@@ -99,6 +105,7 @@ def print_statistics():
         print(f"\tData rate: {data_rate:.2f} bytes/sec")
         print(f"\tPacket rate: {packet_rate:.2f} packets/sec")
 
+
     total_bytes = sum(stats['bytes'] for stats in stream_statistics.values())
     total_packets = sum(stats['packets'] for stats in stream_statistics.values())
     total_duration = max((stats['end_time'] - stats['start_time']) for stats in stream_statistics.values() if
@@ -106,8 +113,13 @@ def print_statistics():
     total_data_rate = total_bytes / total_duration if total_duration > 0 else 0
     total_packet_rate = total_packets / total_duration if total_duration > 0 else 0
 
+    data_rates.append(total_data_rate)
+    packet_rates.append(total_packet_rate)
+    num_flows_list.append(len(stream_statistics))
+
     print("Overall statistics:")
     print(f"\tTotal bytes: {total_bytes}")
     print(f"\tTotal packets: {total_packets}")
     print(f"\tData rate: {total_data_rate:.2f} bytes/sec")
     print(f"\tPacket rate: {total_packet_rate:.2f} packets/sec")
+

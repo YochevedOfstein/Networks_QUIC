@@ -5,7 +5,7 @@ from quic import quic_recv, quic_close, print_statistics
 def server_function():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     HOST = '127.0.0.1'
-    PORT = 12345
+    PORT = 5060
     addr = (HOST, PORT)
     sock.bind(addr)
 
