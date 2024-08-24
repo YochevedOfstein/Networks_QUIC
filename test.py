@@ -188,7 +188,6 @@ class Test(unittest.TestCase):
 
                 client_function()
 
-                # Adjust the expected file calls based on the actual logic
                 expected_file_calls = [call(f'file3.txt_part_{i}.txt', 'wb') for i in range(1, 11)]
                 m.assert_has_calls(expected_file_calls, any_order=True)
 
