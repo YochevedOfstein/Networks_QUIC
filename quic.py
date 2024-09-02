@@ -4,7 +4,7 @@ import random
 import time
 import threading
 
-# Global dictionaries for packet sizes and statistics.
+# Global dictionaries for packet sizes and statistics
 stream_packet_sizes = {}
 stream_statistics = {}
 data_rates = []
